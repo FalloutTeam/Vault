@@ -1,8 +1,9 @@
 package repository
 
 import (
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"vault/modules/auth/service/models"
+	"vault/modules/auth/models"
 )
 
 type Auth interface {
@@ -11,6 +12,7 @@ type Auth interface {
 
 type User interface {
 	GetUserCreds(login string) (models.UserCredentials, error)
+	GetUserTotpKey(id uuid.UUID) (string, error)
 }
 
 type Repository struct {

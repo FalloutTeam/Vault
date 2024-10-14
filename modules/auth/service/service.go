@@ -1,11 +1,12 @@
 package service
 
 import (
+	"vault/modules/auth/models"
 	"vault/modules/auth/repository"
 )
 
 type Auth interface {
-	Login(login string, password string) (string, error)
+	Login(userLogin models.UserLogin) (string, error)
 }
 
 type User interface {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"vault/modules/auth/handler/response"
+	"vault/modules/auth/models"
 	"vault/modules/auth/service"
 )
 
@@ -21,6 +22,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var creds struct {
 		Username string `json:"login" binding:"required"`
 		Password string `json:"password" binding:"required"`
+		Totp     string `json:"totp"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
@@ -28,7 +30,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.service.Auth.Login(creds.Username, creds.Password)
+	token, err := h.service.Auth.Login(models.UserLogin{
+		Login:    creds.Username,
+		Password: creds.Password,
+		Totp:     creds.Totp,
+	})
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return

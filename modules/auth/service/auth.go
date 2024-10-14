@@ -2,13 +2,16 @@ package service
 
 import (
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	"github.com/pquerna/otp/totp"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"time"
+	"vault/modules/auth/models"
 	"vault/modules/auth/repository"
 )
 
@@ -28,16 +31,29 @@ type accessTokenClaims struct {
 	// polices
 }
 
-func (s *AuthService) Login(login string, password string) (string, error) {
-	creds, err := s.repo.User.GetUserCreds(login)
+func (s *AuthService) Login(userLogin models.UserLogin) (string, error) {
+	creds, err := s.repo.User.GetUserCreds(userLogin.Login)
 	if err != nil {
 		logrus.Errorf("modules/auth/service/Login error: %s", err.Error())
 		return "", err
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(creds.PasswordHash), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(creds.PasswordHash), []byte(userLogin.Password))
 	if err != nil {
 		logrus.Errorf("modules/auth/service/Login error: %s", err.Error())
 		return "", err
+	}
+
+	if creds.MfaEnabled {
+		key, err := s.repo.User.GetUserTotpKey(creds.Id)
+		if err != nil {
+			logrus.Errorf("modules/auth/service/Login error: %s", err.Error())
+			return "", err
+		}
+		valid := totp.Validate(userLogin.Totp, key)
+		if !valid {
+			logrus.Errorf("modules/auth/service/Login error: %s", "Invalid totp")
+			return "", errors.New("invalid totp")
+		}
 	}
 
 	token, err := s.generateToken(creds.Id)
