@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"os"
 	"vault/modules/auth"
 	"vault/postgres"
@@ -23,11 +24,22 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 	})
 	if err != nil {
-		logrus.Fatalf("error connecting to the database: %s", err.Error())
+		// Skip until the database is up and running.
+		//logrus.Fatalf("error connecting to the database: %s", err.Error())
 	}
 
 	router := chi.NewRouter()
 	auth.InitModule(router, db)
+
+	port := viper.GetString("server.port")
+	if port == "" {
+		port = "8080"
+	}
+
+	logrus.Infof("Starting server on port %s", port)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
+		logrus.Fatalf("error starting server: %s", err.Error())
+	}
 }
 
 func initConfig() error {

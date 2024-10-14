@@ -6,3 +6,7 @@ db:
   port: "5432"
   dbname: "vault"
   sslmode: "disable"
+
+security:
+  signing_key: "hcgfcjk"
+  salt: "fjkcdjkfv"

@@ -1,8 +1,12 @@
 package handler
 
-import "vault/modules/auth/service"
+import (
+	"net/http"
+	"vault/modules/auth/service"
+)
 
 type Auth interface {
+	Login(w http.ResponseWriter, r *http.Request)
 }
 type Handler struct {
 	Auth

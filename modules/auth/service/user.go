@@ -1,11 +1,13 @@
 package service
 
-import "vault/modules/auth/repository"
+import (
+	"vault/modules/auth/repository"
+)
 
 type UserService struct {
-	repo repository.User
+	repo *repository.Repository
 }
 
-func NewUserService(repo repository.User) *UserService {
+func NewUserService(repo *repository.Repository) *UserService {
 	return &UserService{repo: repo}
 }

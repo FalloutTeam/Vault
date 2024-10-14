@@ -1,8 +1,11 @@
 package service
 
-import "vault/modules/auth/repository"
+import (
+	"vault/modules/auth/repository"
+)
 
 type Auth interface {
+	Login(login string, password string) (string, error)
 }
 
 type User interface {
