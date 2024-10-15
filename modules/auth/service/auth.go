@@ -25,40 +25,29 @@ type AuthService struct {
 	signingKey string
 }
 
-type accessTokenClaims struct {
+type tokenClaims struct {
 	jwt.StandardClaims
-	UserId uuid.UUID `json:"user_id"`
-	// polices
+	//UserId uuid.UUID `json:"user_id"`
+	// TODO: policies
 }
 
-func (s *AuthService) Login(userLogin models.UserLogin) (string, error) {
-	creds, err := s.repo.User.GetUserCreds(userLogin.Login)
+func (s *AuthService) AppRoleLogin(appRoleLogin models.AppRoleLogin) (string, error) {
+	appRoleCreds, err := s.repo.GetAppRoleCreds(appRoleLogin.RoleId)
 	if err != nil {
-		logrus.Errorf("modules/auth/service/Login error: %s", err.Error())
-		return "", err
-	}
-	err = bcrypt.CompareHashAndPassword([]byte(creds.PasswordHash), []byte(userLogin.Password))
-	if err != nil {
-		logrus.Errorf("modules/auth/service/Login error: %s", err.Error())
+		logrus.Errorf("modules/auth/service/AppRoleLogin error: %s", err.Error())
 		return "", err
 	}
 
-	if creds.MfaEnabled {
-		key, err := s.repo.User.GetUserTotpKey(creds.Id)
-		if err != nil {
-			logrus.Errorf("modules/auth/service/Login error: %s", err.Error())
-			return "", err
-		}
-		valid := totp.Validate(userLogin.Totp, key)
-		if !valid {
-			logrus.Errorf("modules/auth/service/Login error: %s", "Invalid totp")
-			return "", errors.New("invalid totp")
-		}
-	}
-
-	token, err := s.generateToken(creds.Id)
+	err = bcrypt.CompareHashAndPassword([]byte(appRoleCreds.SecretHash), []byte(appRoleLogin.SecretId))
 	if err != nil {
-		logrus.Errorf("modules/auth/service/Login error: %s", err.Error())
+		logrus.Errorf("modules/auth/service/AppRoleLogin error: %s", err.Error())
+		return "", err
+	}
+	// TODO: запрос политики доступа
+
+	token, err := s.generateToken("", nil)
+	if err != nil {
+		logrus.Errorf("modules/auth/service/AppRoleLogin error: %s", err.Error())
 		return "", err
 	}
 
@@ -66,15 +55,54 @@ func (s *AuthService) Login(userLogin models.UserLogin) (string, error) {
 
 }
 
-func (s *AuthService) generateToken(userId uuid.UUID) (string, error) {
+func (s *AuthService) UserPassLogin(userLogin models.UserPassLogin) (string, error) {
+	creds, err := s.repo.Auth.GetUserCreds(userLogin.Login)
+	if err != nil {
+		logrus.Errorf("modules/auth/service/UserPassLogin error: %s", err.Error())
+		return "", err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(creds.PasswordHash), []byte(userLogin.Password))
+	if err != nil {
+		logrus.Errorf("modules/auth/service/UserPassLogin error: %s", err.Error())
+		return "", err
+	}
+
+	if creds.MfaEnabled {
+		key, err := s.repo.Auth.GetUserTotpKey(creds.Id)
+		if err != nil {
+			logrus.Errorf("modules/auth/service/UserPassLogin error: %s", err.Error())
+			return "", err
+		}
+		valid := totp.Validate(userLogin.Totp, key)
+		if !valid {
+			logrus.Errorf("modules/auth/service/UserPassLogin error: %s", "Invalid totp")
+			return "", errors.New("invalid totp")
+		}
+	}
+
+	// TODO: запрос политики доступа
+
+	token, err := s.generateToken(creds.Id.String(), nil)
+	if err != nil {
+		logrus.Errorf("modules/auth/service/UserPassLogin error: %s", err.Error())
+		return "", err
+	}
+
+	return token, nil
+
+}
+
+// TODO: Прописать структуру объекта "политика доступа"
+func (s *AuthService) generateToken(userId string, policies interface{}) (string, error) {
 	tokenId := uuid.New().String()
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &accessTokenClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &tokenClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Id:        tokenId,
 		},
-		userId,
+		//userId,
+		// TODO: policies
 	})
 
 	signedString, err := token.SignedString([]byte(s.signingKey))

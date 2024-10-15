@@ -9,8 +9,18 @@ type UserCredentials struct {
 	MfaEnabled   bool      `json:"mfa_enabled" db:"mfa_enabled"`
 }
 
-type UserLogin struct {
+type UserPassLogin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 	Totp     string `json:"totp"`
+}
+
+type AppRoleLogin struct {
+	RoleId   string `json:"role_id" db:"role_id"`
+	SecretId string `json:"secret_id" db:"secret_id"`
+}
+
+type AppRoleCredentials struct {
+	RoleId     string `json:"role_id" db:"role_id"`
+	SecretHash string `json:"secret_hash" db:"secret_hash"`
 }

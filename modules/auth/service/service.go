@@ -6,7 +6,8 @@ import (
 )
 
 type Auth interface {
-	Login(userLogin models.UserLogin) (string, error)
+	UserPassLogin(userLogin models.UserPassLogin) (string, error)
+	AppRoleLogin(appRoleLogin models.AppRoleLogin) (string, error)
 }
 
 type User interface {

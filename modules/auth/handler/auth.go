@@ -18,7 +18,33 @@ func NewAuthHandler(service *service.Service) *AuthHandler {
 	}
 }
 
-func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) AppRoleLogin(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		RoleId    string `json:"role_id" binding:"required"`
+		SecreteId string `json:"secrete_id" binding:"required"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.service.Auth.AppRoleLogin(models.AppRoleLogin{
+		RoleId:   body.RoleId,
+		SecretId: body.SecreteId,
+	})
+
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	auth := response.AppRoleAuth{ClientToken: token}
+
+	json.NewEncoder(w).Encode(response.AppRoleLoginResponse{AppRoleAuth: auth})
+
+}
+
+func (h *AuthHandler) UserPassLogin(w http.ResponseWriter, r *http.Request) {
 	var creds struct {
 		Username string `json:"login" binding:"required"`
 		Password string `json:"password" binding:"required"`
@@ -30,7 +56,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.service.Auth.Login(models.UserLogin{
+	token, err := h.service.Auth.UserPassLogin(models.UserPassLogin{
 		Login:    creds.Username,
 		Password: creds.Password,
 		Totp:     creds.Totp,
@@ -40,9 +66,9 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	auth := response.Auth{ClientToken: token}
+	auth := response.UserpassAuth{ClientToken: token}
 
-	json.NewEncoder(w).Encode(response.LoginResponse{Auth: auth})
+	json.NewEncoder(w).Encode(response.UserpassLoginResponse{UserpassAuth: auth})
 
 }
 

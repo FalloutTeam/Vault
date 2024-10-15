@@ -6,7 +6,8 @@ import (
 )
 
 type Auth interface {
-	Login(w http.ResponseWriter, r *http.Request)
+	UserPassLogin(w http.ResponseWriter, r *http.Request)
+	AppRoleLogin(w http.ResponseWriter, r *http.Request)
 }
 type Handler struct {
 	Auth
