@@ -20,7 +20,7 @@ func InitModule(router *chi.Mux, db *sqlx.DB) {
 			appRole.Post("/login", handler.AppRoleLogin)
 		})
 		auth.Route("/userpass", func(userpass chi.Router) {
-			userpass.Post("login", handler.UserPassLogin)
+			userpass.Post("/login", handler.UserPassLogin)
 		})
 		// TODO: Другие маршруты аутентификации
 	})
