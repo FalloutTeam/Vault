@@ -56,7 +56,7 @@ func (s *AuthService) AppRoleLogin(appRoleLogin models.AppRoleLogin) (string, er
 }
 
 func (s *AuthService) UserPassLogin(userLogin models.UserPassLogin) (string, error) {
-	creds, err := s.repo.Auth.GetUserCreds(userLogin.Login)
+	creds, err := s.repo.User.GetUserCreds(userLogin.Login)
 	if err != nil {
 		logrus.Errorf("modules/auth/service/UserPassLogin error: %s", err.Error())
 		return "", err
@@ -68,7 +68,7 @@ func (s *AuthService) UserPassLogin(userLogin models.UserPassLogin) (string, err
 	}
 
 	if creds.MfaEnabled {
-		key, err := s.repo.Auth.GetUserTotpKey(creds.Id)
+		key, err := s.repo.User.GetUserTotpKey(creds.Id)
 		if err != nil {
 			logrus.Errorf("modules/auth/service/UserPassLogin error: %s", err.Error())
 			return "", err

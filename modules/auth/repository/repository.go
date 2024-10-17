@@ -6,7 +6,7 @@ import (
 	"vault/modules/auth/models"
 )
 
-type Auth interface {
+type User interface {
 	GetUserCreds(login string) (models.UserCredentials, error)
 	GetUserTotpKey(id uuid.UUID) (string, error)
 	GetAppRoleCreds(roleId string) (models.AppRoleCredentials, error)
@@ -24,13 +24,13 @@ type Auth interface {
 type Policy interface{}
 
 type Repository struct {
-	Auth
+	User
 	Policy
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Auth: NewAuthRepo(db),
+		User: NewUserRepo(db),
 		//User: NewUserRepo(db),
 	}
 }
