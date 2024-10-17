@@ -1,9 +1,15 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"vault/modules/totp/models"
+)
 
 type Totp interface {
-	CreateTotp(userId string) error
+	CreateTotp(name string, totp models.Totp) error
+	//TODO: Delete()
+	//TODO: Read()
+	//TODO: List()
 }
 type Repository struct {
 	Totp

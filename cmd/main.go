@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"vault/modules/auth"
+	"vault/modules/totp"
 	"vault/postgres"
 
 	"github.com/spf13/viper"
@@ -30,6 +31,7 @@ func main() {
 
 	router := chi.NewRouter()
 	auth.InitModule(router, db)
+	totp.InitModule(router, db)
 
 	port := viper.GetString("server.port")
 	if port == "" {

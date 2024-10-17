@@ -1,11 +1,15 @@
 package service
 
 import (
+	"vault/modules/totp/models"
 	"vault/modules/totp/repository"
 )
 
 type Totp interface {
-	CreateTotp(userId string) (string, error)
+	CreateTotp(name string, totpParams models.Totp) (string, string, error)
+	//TODO: Delete()
+	//TODO: Read()
+	//TODO: List()
 }
 
 type User interface {

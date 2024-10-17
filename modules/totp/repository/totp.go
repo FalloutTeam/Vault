@@ -1,14 +1,16 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"vault/modules/totp/models"
+)
 
 type TotpRepo struct {
 	db *sqlx.DB
 }
 
-func (t TotpRepo) CreateTotp(userId string) error {
-	//TODO implement me
-	panic("implement me")
+func (t TotpRepo) CreateTotp(name string, totp models.Totp) error {
+	return nil
 }
 
 func NewTotpRepo(db *sqlx.DB) *TotpRepo {

@@ -7,7 +7,9 @@ import (
 
 type Totp interface {
 	CreateTotp(w http.ResponseWriter, r *http.Request)
-	//DeleteTotp(w http.ResponseWriter, r *http.Request)
+	//TODO: Delete()
+	//TODO: Read()
+	//TODO: List()
 }
 type Handler struct {
 	Totp
