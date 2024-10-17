@@ -30,7 +30,6 @@ type policy struct {
 }
 type tokenClaims struct {
 	jwt.StandardClaims
-	//UserId uuid.UUID `json:"user_id"`
 	Policies []policy `json:"policies"`
 }
 
