@@ -24,11 +24,14 @@ type AuthService struct {
 	salt       string
 	signingKey string
 }
-
+type policy struct {
+	Path         string   `json:"path"`
+	Capabilities []string `json:"capabilities"`
+}
 type tokenClaims struct {
 	jwt.StandardClaims
 	//UserId uuid.UUID `json:"user_id"`
-	// TODO: policies
+	Policies []policy `json:"policies"`
 }
 
 func (s *AuthService) AppRoleLogin(appRoleLogin models.AppRoleLogin) (string, error) {
@@ -45,7 +48,7 @@ func (s *AuthService) AppRoleLogin(appRoleLogin models.AppRoleLogin) (string, er
 	}
 	// TODO: запрос политики доступа
 
-	token, err := s.generateToken("", nil)
+	token, err := s.generateToken(nil)
 	if err != nil {
 		logrus.Errorf("modules/auth/service/AppRoleLogin error: %s", err.Error())
 		return "", err
@@ -80,9 +83,13 @@ func (s *AuthService) UserPassLogin(userLogin models.UserPassLogin) (string, err
 		}
 	}
 
-	// TODO: запрос политики доступа
+	// TODO: запрос политики доступа из repository
+	// TODO: убрать хардкод
 
-	token, err := s.generateToken(creds.Id.String(), nil)
+	token, err := s.generateToken([]policy{{
+		Path:         "/totp/keys/*",
+		Capabilities: []string{"create"},
+	}})
 	if err != nil {
 		logrus.Errorf("modules/auth/service/UserPassLogin error: %s", err.Error())
 		return "", err
@@ -92,17 +99,14 @@ func (s *AuthService) UserPassLogin(userLogin models.UserPassLogin) (string, err
 
 }
 
-// TODO: Прописать структуру объекта "политика доступа"
-func (s *AuthService) generateToken(userId string, policies interface{}) (string, error) {
+func (s *AuthService) generateToken(policies []policy) (string, error) {
 	tokenId := uuid.New().String()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &tokenClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Id:        tokenId,
-		},
-		//userId,
-		// TODO: policies
+		}, policies,
 	})
 
 	signedString, err := token.SignedString([]byte(s.signingKey))

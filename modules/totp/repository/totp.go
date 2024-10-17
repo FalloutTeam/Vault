@@ -10,6 +10,8 @@ type TotpRepo struct {
 }
 
 func (t TotpRepo) CreateTotp(name string, totp models.Totp) error {
+	// TODO:  сохранение totp-ключа, для доступа - название (name).
+	// TODO: Eсли ключ уже существует - переписать.
 	return nil
 }
 

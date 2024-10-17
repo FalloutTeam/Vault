@@ -22,7 +22,7 @@ func (s *UserRepo) GetUserCreds(login string) (models.UserCredentials, error) {
 	return models.UserCredentials{
 		Login:        login,
 		PasswordHash: "$2a$10$iQtJMTXWYK88g3uFt./jm.UPHlNd37BJLUmcAE/J.34KAM1jcz3ba",
-		MfaEnabled:   true,
+		MfaEnabled:   false,
 	}, nil
 }
 

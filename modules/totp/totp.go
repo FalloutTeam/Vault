@@ -3,6 +3,7 @@ package totp
 import (
 	"github.com/go-chi/chi"
 	"github.com/jmoiron/sqlx"
+	"vault/middleware"
 	_handler "vault/modules/totp/handler"
 	"vault/modules/totp/repository"
 	_service "vault/modules/totp/service"
@@ -17,7 +18,9 @@ func InitModule(router *chi.Mux, db *sqlx.DB) {
 
 	router.Route("/totp", func(totp chi.Router) {
 		totp.Route("/keys", func(keys chi.Router) {
+			keys.Use(middleware.CheckPermissions("/totp/keys/*", []string{"create"}))
 			keys.Post("/{name}", handler.CreateTotp)
 		})
 	})
+
 }
