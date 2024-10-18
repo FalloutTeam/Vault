@@ -1,13 +1,15 @@
 package main
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"vault/modules/auth"
+	"vault/modules/keys"
 	"vault/modules/totp"
 	"vault/postgres"
+
+	"github.com/go-chi/chi"
+	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/viper"
 )
@@ -32,6 +34,7 @@ func main() {
 	router := chi.NewRouter()
 	auth.InitModule(router, db)
 	totp.InitModule(router, db)
+	keys.InitModule(router, db)
 
 	port := viper.GetString("server.port")
 	if port == "" {
@@ -45,7 +48,7 @@ func main() {
 }
 
 func initConfig() error {
-	viper.AddConfigPath("configs")
+	viper.AddConfigPath("../configs")
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()
 }

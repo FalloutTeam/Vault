@@ -2,9 +2,10 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
-	"net/http"
 )
 
 func CheckPermissions(path string, requiredPermissions []string) func(http.Handler) http.Handler {
