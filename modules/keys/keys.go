@@ -17,9 +17,9 @@ func InitModule(router *chi.Mux, db *sqlx.DB) {
 	handler := _handler.NewHandler(service)
 
 	router.Route("/secret", func(secret chi.Router) {
-		secret.Post("/{name}", handler.AddSecret)
-		secret.Delete("/{name}", handler.DeleteSecret)
-		secret.Patch("/{name}", handler.PatchSecret)
-		secret.Get("/{name}", handler.GetSecret)
+		secret.Post("/{path}", handler.AddSecret)
+		secret.Delete("/{path}", handler.DeleteSecret)
+		secret.Patch("/{path}", handler.PatchSecret)
+		secret.Get("/{path}", handler.GetSecret)
 	})
 }
